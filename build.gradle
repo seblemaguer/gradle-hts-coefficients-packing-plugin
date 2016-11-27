@@ -1,0 +1,52 @@
+plugins {
+    id 'groovy'
+    id 'maven-publish'
+    id 'nu.studer.plugindev' version '1.0.3'
+    id "com.jfrog.bintray" version "1.2"
+}
+
+group 'de.dfki.mary'
+version '0.5.3-SNAPSHOT'
+
+repositories {
+    maven {
+        url 'https://oss.jfrog.org/artifactory/repo'
+    }
+}
+
+dependencies {
+    compile localGroovy()
+    compile group: 'org.codehaus.gpars', name: 'gpars', version: '1.1.0'
+    compile group: 'org.apache.velocity', name: 'velocity', version: '1.7'
+    compile group: 'org.codehaus.gpars', name: 'gpars', version: '1.1.0'
+    compile group: 'org.apache.velocity', name: 'velocity', version: '1.7'
+    compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1'
+    compile group: 'org.ejml', name: 'all', version: '0.29'
+
+}
+
+plugindev {
+    pluginImplementationClass 'de.dfki.mary.htspacking.HTSPackingPlugin'
+    pluginDescription 'hts coefficient packing plugin'
+    pluginLicense 'GPL-3.0'
+    pluginTags 'gradle', 'plugin', 'marytts', 'hts', 'packing'
+    authorId 'slemaguer'
+    authorName 'Sébastien Le Maguer'
+    authorEmail 'slemaguer@coli.uni-saarland.de'
+    projectUrl 'https://github.com/seblemaguer/gradle-hts-coefficients-packing-plugin'
+    projectInceptionYear '2016'
+    done()
+}
+
+
+test {
+  // enable TestNG support (default is JUnit)
+  useTestNG()
+}
+
+// bintray {
+//     user = project.properties.bintrayUser ?: null
+//     key = project.properties.bintrayApiKey ?: null
+//     pkg.userOrg = 'marytts'
+//     pkg.repo = 'marytts'
+// }
