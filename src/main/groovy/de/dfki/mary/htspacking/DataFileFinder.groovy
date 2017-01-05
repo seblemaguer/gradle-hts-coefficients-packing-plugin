@@ -1,9 +1,9 @@
-package de.dfki.mary.coefficientextraction
+package de.dfki.mary.htspacking
 
 import groovy.json.* // To load the JSON configuration file
 
-class DataFileFinder {
-    def static project_path = null
+public class DataFileFinder {
+    def static project_path
     
     static String getFilePath(String filename) {
         // Absolute path
