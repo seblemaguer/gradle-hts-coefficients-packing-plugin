@@ -124,6 +124,38 @@ class HTSPackingPlugin implements Plugin<Project> {
                     extractor.extract("$project.basename")
                 }
             }
+
+            /**
+             * FF0 generation task
+             */
+            project.task('generateFF0') {
+                (new File("$project.buildDir/ff0")).mkdirs()
+                outputs.files "$project.buildDir/ff0" + project.basename + ".ff0"
+
+                def extToDir = new Hashtable<String, String>()
+                extToDir.put("ff0".toString(), "$project.buildDir/ff0".toString())
+
+                config.models.ff0.streams.each  { stream ->
+                    def kind = stream.kind
+                    extToDir.put(kind.toLowerCase().toString(),
+                                 (("$project.buildDir/" + kind.toLowerCase()).toString()))
+                }
+
+                doLast {
+
+                    def extractor = new ExtractFF0(config_file.toString())
+                    extractor.setDirectories(extToDir)
+                    extractor.extract("$project.basename")
+                }
+            }
+
+
+            project.task('pack') {
+                dependsOn "generateCMP"
+                if (config.models.ff0) {
+                    dependsOn "generateFF0"
+                }
+            }
         }
     }
 
