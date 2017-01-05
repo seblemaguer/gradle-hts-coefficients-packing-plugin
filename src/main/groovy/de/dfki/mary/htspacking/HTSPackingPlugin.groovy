@@ -56,8 +56,6 @@ class HTSPackingPlugin implements Plugin<Project> {
         project.ext {
             maryttsVersion = '5.1.2'
 
-            // User configuration
-            user_configuration = config;
 
             trained_files = new HashMap()
 
@@ -99,25 +97,29 @@ class HTSPackingPlugin implements Plugin<Project> {
             }
         }
 
+        project.task('prepareEnvironment') {
+        }
+
         project.afterEvaluate {
 
             /**
              * CMP generation task
              */
             project.task('generateCMP') {
+                dependsOn "prepareEnvironment"
                 (new File("$project.buildDir/cmp")).mkdirs()
                 outputs.files "$project.buildDir/cmp" + project.basename + ".cmp"
 
-                def extToDir = new Hashtable<String, String>()
-                extToDir.put("cmp".toString(), "$project.buildDir/cmp".toString())
-
-                config.models.cmp.streams.each  { stream ->
-                    def kind = stream.kind
-                    extToDir.put(kind.toLowerCase().toString(),
-                                 (("$project.buildDir/" + kind.toLowerCase()).toString()))
-                }
 
                 doLast {
+
+                    def extToDir = new Hashtable<String, String>()
+                    extToDir.put("cmp".toString(), "$project.buildDir/cmp".toString())
+
+                    project.user_configuration.models.cmp.streams.each  { stream ->
+                        def kind = stream.kind
+                        extToDir.put(kind.toLowerCase().toString(), stream.coeffDir.toString())
+                    }
 
                     def extractor = new ExtractCMP(config_file.toString())
                     extractor.setDirectories(extToDir)
@@ -129,19 +131,20 @@ class HTSPackingPlugin implements Plugin<Project> {
              * FFO generation task
              */
             project.task('generateFFO') {
+                dependsOn "prepareEnvironment"
                 (new File("$project.buildDir/ffo")).mkdirs()
                 outputs.files "$project.buildDir/ffo" + project.basename + ".ffo"
 
-                def extToDir = new Hashtable<String, String>()
-                extToDir.put("ffo".toString(), "$project.buildDir/ffo".toString())
-
-                config.models.ffo.streams.each  { stream ->
-                    def kind = stream.kind
-                    extToDir.put(kind.toLowerCase().toString(),
-                                 (("$project.buildDir/" + kind.toLowerCase()).toString()))
-                }
 
                 doLast {
+
+                    def extToDir = new Hashtable<String, String>()
+                    extToDir.put("ffo".toString(), "$project.buildDir/ffo".toString())
+
+                    project.user_configuration.models.ffo.streams.each  { stream ->
+                        def kind = stream.kind
+                        extToDir.put(kind.toLowerCase().toString(), stream.coeffDir.toString())
+                    }
 
                     def extractor = new ExtractFFO(config_file.toString())
                     extractor.setDirectories(extToDir)
@@ -151,7 +154,7 @@ class HTSPackingPlugin implements Plugin<Project> {
 
             project.task('pack') {
                 dependsOn "generateCMP"
-                if (config.models.ffo) {
+                if (project.user_configuration.models.ffo) {
                     dependsOn "generateFFO"
                 }
             }
