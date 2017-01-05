@@ -126,16 +126,16 @@ class HTSPackingPlugin implements Plugin<Project> {
             }
 
             /**
-             * FF0 generation task
+             * FFO generation task
              */
-            project.task('generateFF0') {
-                (new File("$project.buildDir/ff0")).mkdirs()
-                outputs.files "$project.buildDir/ff0" + project.basename + ".ff0"
+            project.task('generateFFO') {
+                (new File("$project.buildDir/ffo")).mkdirs()
+                outputs.files "$project.buildDir/ffo" + project.basename + ".ffo"
 
                 def extToDir = new Hashtable<String, String>()
-                extToDir.put("ff0".toString(), "$project.buildDir/ff0".toString())
+                extToDir.put("ffo".toString(), "$project.buildDir/ffo".toString())
 
-                config.models.ff0.streams.each  { stream ->
+                config.models.ffo.streams.each  { stream ->
                     def kind = stream.kind
                     extToDir.put(kind.toLowerCase().toString(),
                                  (("$project.buildDir/" + kind.toLowerCase()).toString()))
@@ -143,17 +143,16 @@ class HTSPackingPlugin implements Plugin<Project> {
 
                 doLast {
 
-                    def extractor = new ExtractFF0(config_file.toString())
+                    def extractor = new ExtractFFO(config_file.toString())
                     extractor.setDirectories(extToDir)
                     extractor.extract("$project.basename")
                 }
             }
 
-
             project.task('pack') {
                 dependsOn "generateCMP"
-                if (config.models.ff0) {
-                    dependsOn "generateFF0"
+                if (config.models.ffo) {
+                    dependsOn "generateFFO"
                 }
             }
         }

@@ -33,21 +33,21 @@ import org.json.simple.parser.JSONParser;
 import org.ejml.simple.SimpleMatrix;
 
 /**
- * Generation of CMP HTS observation file
+ * Generation of FFO HTS observation file
  *
  * @author <a href="mailto:slemaguer@coli.uni-saarland.de">Sébastien Le Maguer</a>
  */
-public class ExtractFF0 extends ExtractBase
+public class ExtractFFO extends ExtractBase
 {
     private JSONObject config;
 
 
-    public ExtractFF0() throws Exception
+    public ExtractFFO() throws Exception
     {
-        throw new Exception("cannot be used: call \"new ExtractFF0(String config_path)\" instead");
+        throw new Exception("cannot be used: call \"new ExtractFFO(String config_path)\" instead");
     }
 
-    public ExtractFF0(String config_path) throws Exception
+    public ExtractFFO(String config_path) throws Exception
     {
         loadConfig(config_path);
     }
@@ -64,8 +64,7 @@ public class ExtractFF0 extends ExtractBase
      *
      */
     private static void applyWindows(String input_file_name, String output_file_name,
-                                     int dim, ArrayList<String> window_file_names,
-                                     boolean is_msd)
+                                     int dim, ArrayList<String> window_file_names)
         throws Exception
     {
         // Load byte array of data
@@ -139,8 +138,6 @@ public class ExtractFF0 extends ExtractBase
             {
                 for (int d=0; d<dim; d++)
                 {
-                    // MSD boundary evaluation
-                    boolean boundary = false;
                     for (int k=-nlr; k<=nlr; k++)
                     {
                         if (check_bound[k+nlr+1])
@@ -158,40 +155,26 @@ public class ExtractFF0 extends ExtractBase
                             {
                                 l = t + k;
                             }
-
-                            if ((is_msd) && (input_data[l*dim+d] == ExtractCMP.IGNORE_VALUE))
-                                boundary = true;
                         }
                     }
 
-                    // Normal case window
-                    if (!boundary)
-                    {
-                        output_data[t*n_win*dim + dim * i_win + d] = (float) 0.0;
+                    output_data[t*n_win*dim + dim * i_win + d] = (float) 0.0;
 
-                        for (int k=-nlr; k<=nlr; k++)
+                    for (int k=-nlr; k<=nlr; k++)
+                    {
+                        if ((t + k) < 0)
                         {
-                            if ((t + k) < 0)
-                            {
-                                output_data[t*n_win*dim + dim * i_win + d] += win[k+nlr] * input_data[d];
-                            }
-                            else if ((t + k) >= T)
-                            {
-                                output_data[t*n_win*dim + dim * i_win + d] += win[k+nlr] * input_data[((T-1)*dim)+d];
-                            }
-                            else
-                            {
-                                output_data[t*n_win*dim + dim * i_win + d] += win[k+nlr] * input_data[((t+k)*dim)+d];
-                            }
+                            output_data[t*n_win*dim + dim * i_win + d] += win[k+nlr] * input_data[d];
                         }
-
+                        else if ((t + k) >= T)
+                        {
+                            output_data[t*n_win*dim + dim * i_win + d] += win[k+nlr] * input_data[((T-1)*dim)+d];
+                        }
+                        else
+                        {
+                            output_data[t*n_win*dim + dim * i_win + d] += win[k+nlr] * input_data[((t+k)*dim)+d];
+                        }
                     }
-                    // Boundary adaptation
-                    else
-                    {
-                        output_data[t*n_win*dim + dim * i_win + d] = ExtractCMP.IGNORE_VALUE;
-                    }
-
                 }
             }
 
@@ -209,46 +192,6 @@ public class ExtractFF0 extends ExtractBase
         Path path = Paths.get(output_file_name);
         byte[] output_data_bytes = output_buffer.array();
         Files.write(path, output_data_bytes);
-    }
-
-    /**
-     *  Add an HTK header to the input cmp file
-     *
-     *   @param input_file_name the input cmp file path
-     *   @param output_file_name the output cmp file with header path
-     *   @param frameshift the used frameshift in HTK format
-     *   @param framesize the number of coefficients for one frame
-     *   @param HTK_feature_type the HTK feature type information
-     */
-    public static void addHTKHeader(String input_file_name, String output_file_name,
-                                     long frameshift, short framesize, short HTK_feature_type)
-        throws IOException
-    {
-        File output = new File(output_file_name);
-        Path p_input = FileSystems.getDefault().getPath("", input_file_name);
-        byte[] data = Files.readAllBytes(p_input);
-
-        // Prepare buffer
-        long nb_frames = data.length / framesize;
-        ByteBuffer buffer = ByteBuffer.allocate((Integer.SIZE + Short.SIZE)/4);
-        buffer.order(ByteOrder.LITTLE_ENDIAN);
-
-
-        // Generate header
-        buffer.putInt((int) nb_frames);
-        buffer.putInt((int) frameshift);
-
-        buffer.putShort(framesize);
-        buffer.putShort(HTK_feature_type);
-
-        // Generate the output data
-        byte[] header = buffer.array();
-        byte[] output_data = new byte[header.length + data.length];
-        System.arraycopy(header, 0, output_data, 0, header.length);
-        System.arraycopy(data, 0, output_data, header.length, data.length);
-
-        Path path = Paths.get(output_file_name);
-        Files.write(path, output_data);
     }
 
     /**
@@ -325,7 +268,7 @@ public class ExtractFF0 extends ExtractBase
 
 
     /**
-     * Extraction method => generate the cmp file
+     * Extraction method => generate the ffo file
      *
      *   @param basename: the basename of the utterance file analyzed. Each specific filename is
      *   built using the kind officients (extensio)
@@ -343,8 +286,8 @@ public class ExtractFF0 extends ExtractBase
 
         // Loading stream informations
         JSONObject models = (JSONObject) config.get("models");
-        JSONObject cmp = (JSONObject) models.get("ff0");
-        JSONArray streams = (JSONArray) cmp.get("streams");
+        JSONObject ffo = (JSONObject) models.get("ffo");
+        JSONArray streams = (JSONArray) ffo.get("streams");
 
         long total_vecsize = 0;
         ArrayList<Hashtable<String, String>> internal_streams = new ArrayList<Hashtable<String, String>>();
@@ -369,7 +312,7 @@ public class ExtractFF0 extends ExtractBase
             String kind = (String) cur_stream.get("kind");
             String cur_dir = (String) extToDir.get(kind);
             applyWindows(cur_dir + "/" + basename + "." + kind, tmp_filename + "." + kind,
-                         (int)vecsize, winfiles, is_msd);
+                         (int) vecsize, winfiles);
             cur_internal_stream.put("kind", kind);
             cur_internal_stream.put("obs_file_name", tmp_filename + "." + kind);
 
@@ -390,8 +333,8 @@ public class ExtractFF0 extends ExtractBase
         // Merging
         Hashtable<String, String> cur_stream = internal_streams.get(0);
 
-        String previous_state_filename = tmp_filename + ".tmp_cmp";
-        String cur_state_filename = tmp_filename + ".tmp2_cmp";
+        String previous_state_filename = tmp_filename + ".tmp_ffo";
+        String cur_state_filename = tmp_filename + ".tmp2_ffo";
 
         // Copy first stream to the tmp previous file
         Files.copy(Paths.get(internal_streams.get(0).get("obs_file_name")), Paths.get(previous_state_filename), REPLACE_EXISTING);
@@ -414,11 +357,6 @@ public class ExtractFF0 extends ExtractBase
             // Delete coef file
             (new File(cur_stream.get("obs_file_name"))).delete();
         }
-
-        // Add header
-        short nb_bytes_frame = (new Integer(4 * ((new Long(total_vecsize)).intValue()))).shortValue();
-        addHTKHeader(previous_state_filename, extToDir.get("cmp") + "/" + basename + ".cmp",
-                     frameshift, nb_bytes_frame, (short) 9);
 
         // Delete temps files
         (new File(previous_state_filename)).delete();
