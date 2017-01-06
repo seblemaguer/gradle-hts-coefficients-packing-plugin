@@ -358,6 +358,8 @@ public class ExtractFFO extends ExtractBase
             (new File(cur_stream.get("obs_file_name"))).delete();
         }
 
+        Files.copy(Paths.get(previous_state_filename), Paths.get(extToDir.get("ffo") + "/" + basename + ".ffo"), REPLACE_EXISTING);
+
         // Delete temps files
         (new File(previous_state_filename)).delete();
         (new File(cur_state_filename)).delete();
