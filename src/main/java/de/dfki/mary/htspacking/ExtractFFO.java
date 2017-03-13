@@ -278,12 +278,6 @@ public class ExtractFFO extends ExtractBase
         // Preparation of temp stuffs
         String tmp_filename = File.createTempFile("0000" + basename, "").getPath();
 
-
-        // Loading signal config informations
-        JSONObject signal = (JSONObject) config.get("signal");
-        long samplerate = ((Long) signal.get("samplerate"));
-        long frameshift = ((Long) signal.get("frameshift")) * 10000;
-
         // Loading stream informations
         JSONObject models = (JSONObject) config.get("models");
         JSONObject ffo = (JSONObject) models.get("ffo");

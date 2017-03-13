@@ -40,7 +40,6 @@ class HTSPackingPlugin implements Plugin<Project> {
             DataFileFinder.project_path = config.data.project_dir
         }
 
-        def beams = config.settings.training.beam.split() as List
         def nb_proc_local = 1
         if (project.gradle.startParameter.getMaxWorkerCount() != 0) {
             nb_proc_local = Runtime.getRuntime().availableProcessors(); // By default the number of core
@@ -56,6 +55,8 @@ class HTSPackingPlugin implements Plugin<Project> {
         project.ext {
             maryttsVersion = '5.1.2'
 
+            // User configuration
+            user_configuration = config;
 
             trained_files = new HashMap()
 
@@ -68,8 +69,6 @@ class HTSPackingPlugin implements Plugin<Project> {
 
             template_dir = "$project.buildDir/tmp/templates"
 
-
-            input_file = DataFileFinder.getFilePath(config.data.wav_dir) + "/${project.name}.wav"
             basename = project.name
         }
 
@@ -107,12 +106,12 @@ class HTSPackingPlugin implements Plugin<Project> {
              */
             project.task('generateCMP') {
                 dependsOn "prepareEnvironment"
-                (new File("$project.buildDir/cmp")).mkdirs()
                 outputs.files "$project.buildDir/cmp" + project.basename + ".cmp"
 
 
                 doLast {
 
+                    (new File("$project.buildDir/cmp")).mkdirs()
                     def extToDir = new Hashtable<String, String>()
                     extToDir.put("cmp".toString(), "$project.buildDir/cmp".toString())
 
@@ -132,11 +131,12 @@ class HTSPackingPlugin implements Plugin<Project> {
              */
             project.task('generateFFO') {
                 dependsOn "prepareEnvironment"
-                (new File("$project.buildDir/ffo")).mkdirs()
                 outputs.files "$project.buildDir/ffo" + project.basename + ".ffo"
 
 
                 doLast {
+
+                    (new File("$project.buildDir/ffo")).mkdirs()
 
                     def extToDir = new Hashtable<String, String>()
                     extToDir.put("ffo".toString(), "$project.buildDir/ffo".toString())
@@ -153,7 +153,9 @@ class HTSPackingPlugin implements Plugin<Project> {
             }
 
             project.task('pack') {
-                dependsOn "generateCMP"
+                if (project.user_configuration.models.cmp) {
+                    dependsOn "generateCMP"
+                }
                 if (project.user_configuration.models.ffo) {
                     dependsOn "generateFFO"
                 }
