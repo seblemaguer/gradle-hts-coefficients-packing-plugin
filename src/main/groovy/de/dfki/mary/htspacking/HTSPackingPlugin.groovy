@@ -40,7 +40,7 @@ class HTSPackingPlugin implements Plugin<Project> {
         project.afterEvaluate {
 
             project.task('configuration') {
-
+                dependsOn "configurationPacking"
                 // User configuration
                 ext.user_configuration = project.configurationPacking.hasProperty("user_configuration") ? project.configurationPacking.user_configuration : null
                 ext.config_file = project.configurationPacking.hasProperty("config_file") ? project.configurationPacking.config_file : null
