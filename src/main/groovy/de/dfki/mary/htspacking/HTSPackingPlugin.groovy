@@ -39,8 +39,14 @@ class HTSPackingPlugin implements Plugin<Project> {
 
         project.afterEvaluate {
 
+            /**
+             *  Configuration task
+             *
+             */
             project.task('configuration') {
+                description "Task which configure the current plugin process. This task depends on configurationPacking"
                 dependsOn "configurationPacking"
+
                 // User configuration
                 ext.user_configuration = project.configurationPacking.hasProperty("user_configuration") ? project.configurationPacking.user_configuration : null
                 ext.config_file = project.configurationPacking.hasProperty("config_file") ? project.configurationPacking.config_file : null
@@ -53,9 +59,11 @@ class HTSPackingPlugin implements Plugin<Project> {
 
 
             /**
-             * CMP generation task
+             *  CMP generation task
+             *
              */
             project.task('generateCMP') {
+                description "Generate CMP coefficients necessary for the HMM training using HTS"
                 dependsOn "configuration"
                 outputs.files "$project.buildDir/cmp" + project.basename + ".cmp"
 
@@ -78,9 +86,11 @@ class HTSPackingPlugin implements Plugin<Project> {
             }
 
             /**
-             * FFO generation task
+             *  FFO generation task
+             *
              */
             project.task('generateFFO') {
+                description "Generate FF0 coefficients used as the DNN training output using HTS"
                 dependsOn "configuration"
                 outputs.files "$project.buildDir/ffo" + project.basename + ".ffo"
 
@@ -103,7 +113,12 @@ class HTSPackingPlugin implements Plugin<Project> {
                 }
             }
 
+            /**
+             *  Entry tasks
+             *
+             */
             project.task('pack') {
+                description "Entry point task which depends on the generation of CMP or FF0 according to the configuration file"
                 if (project.configuration.user_configuration.models.cmp) {
                     dependsOn "generateCMP"
                 }

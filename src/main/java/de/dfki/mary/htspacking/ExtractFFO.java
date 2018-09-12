@@ -295,7 +295,6 @@ public class ExtractFFO extends ExtractBase
             cur_internal_stream.put("dim", Long.toString(vecsize));
 
             // Add the tmp observation file and apply the windows to get it
-
             ArrayList<String> winfiles = new ArrayList<String>();
             for (Object cur_win : (JSONArray) cur_stream.get("winfiles"))
             {

@@ -331,7 +331,9 @@ public class ExtractFFI extends ExtractBase
         String cur_state_filename = tmp_filename + ".tmp2_ffi";
 
         // Copy first stream to the tmp previous file
-        Files.copy(Paths.get(internal_streams.get(0).get("obs_file_name")), Paths.get(previous_state_filename), REPLACE_EXISTING);
+        Files.copy(Paths.get(internal_streams.get(0).get("obs_file_name")),
+                   Paths.get(previous_state_filename),
+                   REPLACE_EXISTING);
         (new File(internal_streams.get(0).get("obs_file_name"))).delete();
 
         for (int i=1; i<internal_streams.size(); i++)
@@ -352,7 +354,9 @@ public class ExtractFFI extends ExtractBase
             (new File(cur_stream.get("obs_file_name"))).delete();
         }
 
-        Files.copy(Paths.get(previous_state_filename), Paths.get(extToDir.get("ffi") + "/" + basename + ".ffi"), REPLACE_EXISTING);
+        Files.copy(Paths.get(previous_state_filename),
+                   Paths.get(extToDir.get("ffi") + "/" + basename + ".ffi"),
+                   REPLACE_EXISTING);
 
         // Delete temps files
         (new File(previous_state_filename)).delete();
