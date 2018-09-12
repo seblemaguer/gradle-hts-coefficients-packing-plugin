@@ -9,9 +9,7 @@ group 'de.dfki.mary'
 version '1.0-SNAPSHOT'
 
 repositories {
-    maven {
-        url 'https://oss.jfrog.org/artifactory/repo'
-    }
+    jcenter()
 }
 
 dependencies {
