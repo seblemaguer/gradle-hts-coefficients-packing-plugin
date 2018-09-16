@@ -89,6 +89,7 @@ public class GenerateCMP
 
         // Fill bytebuffer
         ByteBuffer data = ByteBuffer.allocate(size);
+        data.order(ByteOrder.LITTLE_ENDIAN);
         for (int t=0; t<T; t++) {
             for (int s=0; s<nb_streams; s++) {
                 double[] tmp = O_list.get(s)[t];
@@ -197,10 +198,12 @@ public class GenerateCMP
         // Generate data
         byte[] data = merge(O_list);
 
-        // Save CMP
+        // Generate full byte array
         byte[] output_data = new byte[header.length + data.length];
         System.arraycopy(header, 0, output_data, 0, header.length);
         System.arraycopy(data, 0, output_data, header.length, data.length);
+
+        // Save the cmp file
         Files.write(output_cmp_file.toPath(), output_data);
     }
 }
