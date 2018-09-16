@@ -126,7 +126,7 @@ public class GenerateCMP
             framesize += (short) cur_o[0].length;
         }
 
-        // short nb_bytes_frame = (new Integer(4 * ((new Long(total_vecsize)).intValue()))).shortValue();
+        framesize= (short) (Float.BYTES * framesize);
 
         // Generate header
         buffer.putInt(nb_frames);
@@ -147,9 +147,8 @@ public class GenerateCMP
         ByteBuffer buffer = ByteBuffer.wrap(data_bytes);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
 
-        // Compute size
-        int T = data_bytes.length / (dim*Float.BYTES);
-        int input_data_size = T*dim;
+        // Compute nb frames
+        int T = data_bytes.length / (dim * Float.BYTES);
 
         // Generate vector C
         double[][] input_data = new double[T][dim];
@@ -180,7 +179,7 @@ public class GenerateCMP
 
             // Load data
             double[][] input_data = loadFile(cur_file,
-                                             ((Integer) stream_infos.get(i).get("order")).intValue());
+                                             ((Integer) stream_infos.get(i).get("order")).intValue()+1);
 
             // Apply window
             double[][] O = WindowUtils.applyWindows(input_data,
