@@ -11,9 +11,7 @@ import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.bundling.Zip
 
-import static groovyx.gpars.GParsPool.runForkJoin
-import static groovyx.gpars.GParsPool.withPool
-
+import de.dfki.mary.htspacking.task.*
 import de.dfki.mary.htspacking.*
 
 import groovy.json.JsonBuilder
@@ -27,7 +25,7 @@ class HTSPackingPlugin implements Plugin<Project> {
         project.plugins.apply JavaPlugin
         project.plugins.apply MavenPlugin
 
-        project.sourceCompatibility = JavaVersion.VERSION_1_7
+        project.sourceCompatibility = JavaVersion.VERSION_1_8
 
         project.ext {
             basename = project.name
@@ -43,18 +41,17 @@ class HTSPackingPlugin implements Plugin<Project> {
              *  Configuration task
              *
              */
-            project.task('configuration') {
+            project.task('configurationPacking') {
                 description "Task which configure the current plugin process. This task depends on configurationPacking"
-                dependsOn "configurationPacking"
+                dependsOn "configuration"
 
-                // User configuration
-                ext.user_configuration = project.configurationPacking.hasProperty("user_configuration") ? project.configurationPacking.user_configuration : null
-                ext.config_file = project.configurationPacking.hasProperty("config_file") ? project.configurationPacking.config_file : null
+
+                ext.nb_proc = project.configuration.hasProperty("nb_proc") ? project.configuration.nb_proc : 1
                 ext.trained_files = new HashMap()
 
-                // Nb processes
-                ext.nb_proc = project.configurationPacking.hasProperty("nb_proc") ? project.configurationPacking.nb_proc : 1
-
+                // Configuration
+                ext.user_configuration = project.configuration.hasProperty("user_configuration") ? project.configuration.user_configuration : null
+                ext.config_file = project.configurationPacking.hasProperty("config_file") ? project.configurationPacking.config_file : null
             }
 
 
@@ -62,27 +59,11 @@ class HTSPackingPlugin implements Plugin<Project> {
              *  CMP generation task
              *
              */
-            project.task('generateCMP') {
+            project.task('generateCMP', type: GenerateCMPTask) {
                 description "Generate CMP coefficients necessary for the HMM training using HTS"
                 dependsOn "configuration"
-                outputs.files "$project.buildDir/cmp" + project.basename + ".cmp"
-
-
-                doLast {
-
-                    (new File("$project.buildDir/cmp")).mkdirs()
-                    def extToDir = new Hashtable<String, String>()
-                    extToDir.put("cmp".toString(), "$project.buildDir/cmp".toString())
-
-                    project.configuration.user_configuration.models.cmp.streams.each  { stream ->
-                        def kind = stream.kind
-                        extToDir.put(kind.toLowerCase().toString(), stream.coeffDir.toString())
-                    }
-
-                    def extractor = new ExtractCMP(project.configuration.config_file.toString())
-                    extractor.setDirectories(extToDir)
-                    extractor.extract("$project.basename")
-                }
+                cmp_dir = new File("$project.buildDir/cmp")
+                list_basenames = new File(project.configuration.list_basenames)
             }
 
             /**
@@ -90,27 +71,27 @@ class HTSPackingPlugin implements Plugin<Project> {
              *
              */
             project.task('generateFFO') {
-                description "Generate FF0 coefficients used as the DNN training output using HTS"
-                dependsOn "configuration"
-                outputs.files "$project.buildDir/ffo" + project.basename + ".ffo"
+                // description "Generate FF0 coefficients used as the DNN training output using HTS"
+                // dependsOn "configuration"
+                // outputs.files "$project.buildDir/ffo" + project.basename + ".ffo"
 
 
-                doLast {
+                // doLast {
 
-                    (new File("$project.buildDir/ffo")).mkdirs()
+                //     (new File("$project.buildDir/ffo")).mkdirs()
 
-                    def extToDir = new Hashtable<String, String>()
-                    extToDir.put("ffo".toString(), "$project.buildDir/ffo".toString())
+                //     def extToDir = new Hashtable<String, String>()
+                //     extToDir.put("ffo".toString(), "$project.buildDir/ffo".toString())
 
-                    project.configuration.user_configuration.models.ffo.streams.each  { stream ->
-                        def kind = stream.kind
-                        extToDir.put(kind.toLowerCase().toString(), stream.coeffDir.toString())
-                    }
+                //     project.configuration.user_configuration.models.ffo.streams.each  { stream ->
+                //         def kind = stream.kind
+                //         extToDir.put(kind.toLowerCase().toString(), stream.coeffDir.toString())
+                //     }
 
-                    def extractor = new ExtractFFO(project.configuration.config_file.toString())
-                    extractor.setDirectories(extToDir)
-                    extractor.extract("$project.basename")
-                }
+                //     def extractor = new ExtractFFO(project.configuration.config_file.toString())
+                //     extractor.setDirectories(extToDir)
+                //     extractor.extract("$project.basename")
+                // }
             }
 
             /**
