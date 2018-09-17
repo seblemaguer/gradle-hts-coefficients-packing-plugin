@@ -70,28 +70,11 @@ class HTSPackingPlugin implements Plugin<Project> {
              *  FFO generation task
              *
              */
-            project.task('generateFFO') {
-                // description "Generate FF0 coefficients used as the DNN training output using HTS"
-                // dependsOn "configuration"
-                // outputs.files "$project.buildDir/ffo" + project.basename + ".ffo"
-
-
-                // doLast {
-
-                //     (new File("$project.buildDir/ffo")).mkdirs()
-
-                //     def extToDir = new Hashtable<String, String>()
-                //     extToDir.put("ffo".toString(), "$project.buildDir/ffo".toString())
-
-                //     project.configuration.user_configuration.models.ffo.streams.each  { stream ->
-                //         def kind = stream.kind
-                //         extToDir.put(kind.toLowerCase().toString(), stream.coeffDir.toString())
-                //     }
-
-                //     def extractor = new ExtractFFO(project.configuration.config_file.toString())
-                //     extractor.setDirectories(extToDir)
-                //     extractor.extract("$project.basename")
-                // }
+            project.task('generateFFO', type: GenerateFFOTask) {
+                description "Generate FFO coefficients necessary for the HMM training using HTS"
+                dependsOn "configuration"
+                ffo_dir = new File("$project.buildDir/ffo")
+                list_basenames = new File(project.configuration.list_basenames)
             }
 
             /**
