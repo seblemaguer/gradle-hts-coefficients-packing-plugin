@@ -105,32 +105,6 @@ class GenerateCMPWorker implements Runnable {
         this.configuration = configuration
     }
 
-
-    /**
-     *  Simple method to deal with project directories
-     *
-     *  @param winfiles : the original window filenames from the configuration
-     *  @returns the window filenames adapted to the project architecture
-     */
-    private ArrayList<String> adaptWinFilePathes(ArrayList<String> winfiles) throws Exception {
-
-        // Get project dir
-        String project_dir = (String) configuration.data.project_dir;
-
-        // Adapt the pathes
-        ArrayList<String> result_winfiles = new ArrayList<String>();
-        for (String win: winfiles) {
-            if (win.startsWith("/")) {
-                result_winfiles.add(win);
-            } else {
-                result_winfiles.add(project_dir + "/" + win);
-            }
-        }
-
-        return result_winfiles;
-    }
-
-
     /**
      *  Run method which achieve the generateion/conversion
      *
@@ -144,7 +118,7 @@ class GenerateCMPWorker implements Runnable {
 
             cur_stream["is_msd"] = stream.is_msd;
             cur_stream["order"] = stream.order;
-            cur_stream["windows"] = WindowUtils.loadWindows(adaptWinFilePathes(stream.winfiles));
+            cur_stream["windows"] = WindowUtils.loadWindows(stream.winfiles);
 
             stream_infos.add(cur_stream);
         }

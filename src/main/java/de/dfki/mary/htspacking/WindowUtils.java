@@ -169,17 +169,6 @@ public class WindowUtils
 
         // return
         return output_data;
-
-        // // Saving O
-        // ByteBuffer output_buffer = ByteBuffer.allocate(n_win*data_bytes.length);
-        // output_buffer.order(ByteOrder.LITTLE_ENDIAN);
-        // for (int v=0; v<output_data.length;v++){
-        //     output_buffer.putdouble(output_data[v]);
-        // }
-
-        // Path path = Paths.get(output_file_name);
-        // byte[] output_data_bytes = output_buffer.array();
-        // Files.write(path, output_data_bytes);
     }
 
 }
