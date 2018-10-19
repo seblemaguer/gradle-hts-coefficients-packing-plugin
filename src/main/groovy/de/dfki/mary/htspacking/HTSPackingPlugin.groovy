@@ -63,7 +63,7 @@ class HTSPackingPlugin implements Plugin<Project> {
                 description "Generate CMP coefficients necessary for the HMM training using HTS"
                 dependsOn "configuration"
                 cmp_dir = new File("$project.buildDir/cmp")
-                list_basenames = new File(project.configuration.list_basenames)
+                list_basenames = project.configuration.list_basenames
             }
 
             /**
@@ -74,7 +74,7 @@ class HTSPackingPlugin implements Plugin<Project> {
                 description "Generate FFO coefficients necessary for the HMM training using HTS"
                 dependsOn "configuration"
                 ffo_dir = new File("$project.buildDir/ffo")
-                list_basenames = new File(project.configuration.list_basenames)
+                list_basenames = project.configuration.list_basenames
             }
 
             /**
