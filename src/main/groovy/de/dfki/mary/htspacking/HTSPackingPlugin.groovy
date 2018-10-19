@@ -82,12 +82,14 @@ class HTSPackingPlugin implements Plugin<Project> {
              *
              */
             project.task('pack') {
+                dependsOn "generateCMP"
                 description "Entry point task which depends on the generation of CMP or FF0 according to the configuration file"
-                if (project.configuration.user_configuration.models.cmp) {
-                    dependsOn "generateCMP"
-                }
+                ext.cmp_dir = project.generateCMP.cmp_dir
+
+                ext.ffo_dir = null
                 if (project.configuration.user_configuration.models.ffo) {
-                    dependsOn "generateFFO"
+                dependsOn "generateFFO"
+                    ext.ffo_dir = project.generateFFO.ffo_dir
                 }
             }
         }
