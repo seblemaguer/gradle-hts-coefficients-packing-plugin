@@ -37,14 +37,14 @@ public class WindowUtils
 
     private static final float IGNORE_VALUE = (float) -1.0e+10;
 
-    public static ArrayList<double[]> loadWindows(ArrayList<String> win_files)
+    public static ArrayList<double[]> loadWindows(ArrayList<File> win_files)
         throws FileNotFoundException, IOException {
         ArrayList<double[]> windows = new ArrayList<double[]>();
-        for (String win_filename: win_files) {
+        for (File win_file: win_files) {
 
             // Read the file
             BufferedReader reader =
-                new BufferedReader(new InputStreamReader(new FileInputStream(win_filename)));
+                new BufferedReader(new InputStreamReader(new FileInputStream(win_file)));
             String line = reader.readLine();
             reader.close();
             String[] elts = line.split(" ");
