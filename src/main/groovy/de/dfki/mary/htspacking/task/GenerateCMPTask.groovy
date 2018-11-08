@@ -12,8 +12,9 @@ import org.gradle.workers.*;
 // Gradle task related
 import org.gradle.api.Action;
 import org.gradle.api.DefaultTask
-import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.tasks.*
 
 // Generateion helper class
@@ -33,7 +34,7 @@ public class GenerateCMPTask extends DefaultTask {
 
     /** The directory containing the spectrum files */
     @OutputDirectory
-    final DirectoryProperty cmp_dir = newOutputDirectory()
+    final DirectoryProperty cmp_directory = newOutputDirectory()
 
     /**
      *  The constructor which defines which worker executor is going to achieve the conversion job
@@ -60,7 +61,7 @@ public class GenerateCMPTask extends DefaultTask {
             }
 
             // Generate output filename
-            File cmp_file = new File(cmp_dir.getAsFile().get(), basename + ".cmp");
+            File cmp_file = cmp_directory.file(basename + ".cmp").get().getAsFile();
 
             // Submit the execution
             workerExecutor.submit(GenerateCMPWorker.class,
