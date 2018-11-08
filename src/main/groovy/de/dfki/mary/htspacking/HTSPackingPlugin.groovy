@@ -35,63 +35,43 @@ class HTSPackingPlugin implements Plugin<Project> {
             template_dir = "$project.buildDir/tmp/templates"
         }
 
-        project.afterEvaluate {
 
-            /**
-             *  Configuration task
-             *
-             */
-            project.task('configurationPacking') {
-                description "Task which configure the current plugin process. This task depends on configurationPacking"
-                dependsOn "configuration"
+        /**
+         *  Configuration task
+         *
+         */
+        project.task('configurationPacking') {
+            description "Task which configure the current plugin process. This task depends on configurationPacking"
 
 
-                ext.nb_proc = project.configuration.hasProperty("nb_proc") ? project.configuration.nb_proc : 1
-                ext.trained_files = new HashMap()
+            ext.nb_proc = project.configuration.hasProperty("nb_proc") ? project.configuration.nb_proc : 1
+            ext.trained_files = new HashMap()
 
-                // Configuration
-                ext.user_configuration = project.configuration.hasProperty("user_configuration") ? project.configuration.user_configuration : null
-                ext.config_file = project.configurationPacking.hasProperty("config_file") ? project.configurationPacking.config_file : null
-            }
+            // Configuration
+            ext.user_configuration = project.configuration.hasProperty("user_configuration") ? project.configuration.user_configuration : null
+            ext.config_file = project.configurationPacking.hasProperty("config_file") ? project.configurationPacking.config_file : null
+        }
 
 
-            /**
-             *  CMP generation task
-             *
-             */
-            project.task('generateCMP', type: GenerateCMPTask) {
-                description "Generate CMP coefficients necessary for the HMM training using HTS"
-                dependsOn "configuration"
-                cmp_dir = new File("$project.buildDir/cmp")
-                list_basenames = project.configuration.list_basenames
-            }
+        /**
+         *  CMP generation task
+         *
+         */
+        project.task('generateCMP', type: GenerateCMPTask) {
+            description "Generate CMP coefficients necessary for the HMM training using HTS"
+            list_basenames = project.configuration.list_basenames
+            cmp_directory = project.file("$project.buildDir/cmp")
+        }
 
-            /**
-             *  FFO generation task
-             *
-             */
-            project.task('generateFFO', type: GenerateFFOTask) {
-                description "Generate FFO coefficients necessary for the HMM training using HTS"
-                dependsOn "configuration"
-                ffo_dir = new File("$project.buildDir/ffo")
-                list_basenames = project.configuration.list_basenames
-            }
-
-            /**
-             *  Entry tasks
-             *
-             */
-            project.task('pack') {
-                dependsOn "generateCMP"
-                description "Entry point task which depends on the generation of CMP or FF0 according to the configuration file"
-                ext.cmp_dir = project.generateCMP.cmp_dir
-
-                ext.ffo_dir = null
-                if (project.configuration.user_configuration.models.ffo) {
-                dependsOn "generateFFO"
-                    ext.ffo_dir = project.generateFFO.ffo_dir
-                }
-            }
+        /**
+         *  FFO generation task
+         *
+         */
+        project.task('generateFFO', type: GenerateFFOTask) {
+            description "Generate FFO coefficients necessary for the HMM training using HTS"
+            dependsOn "configuration"
+            ffo_dir = new File("$project.buildDir/ffo")
+            list_basenames = project.configuration.list_basenames
         }
     }
 
