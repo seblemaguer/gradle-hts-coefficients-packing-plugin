@@ -27,9 +27,9 @@ public class GenerateFFOTask extends DefaultTask {
     /** The worker */
     private final WorkerExecutor workerExecutor;
 
-    /** The list of files to manipulate */
-    @InputFile
-    final RegularFileProperty list_basenames = newInputFile()
+    /** One of the input directory to get the file list*/
+    @InputDirectory
+    final DirectoryProperty origin_directory = newInputDirectory()
 
     /** The directory containing the spectrum files */
     @OutputDirectory
@@ -52,10 +52,14 @@ public class GenerateFFOTask extends DefaultTask {
      */
     @TaskAction
     public void generate() {
-        for (String basename: list_basenames.getAsFile().get().readLines()) {
+        // FIXME: for now basename = only extension
+        project.fileTree(wav_dir.get()).include('*.*').collect { orig_file ->
+            // Get basename
+            String basename = orig_file.getName().take(filename.lastIndexOf('.'))
+
             // List all input files
             ArrayList<File> input_files = new ArrayList<File>();
-            for (def stream: project.configuration.user_configuration.models.ffo.streams) {
+            for (def stream: project.vb_configuration.models.ffo.streams) {
                 input_files.add(new File(stream.coeffDir, basename + "." + stream.kind))
             }
 
@@ -69,7 +73,7 @@ public class GenerateFFOTask extends DefaultTask {
                     public void execute(WorkerConfiguration config) {
                         config.setIsolationMode(IsolationMode.NONE);
                         config.params(input_files, ffo_file,
-                                      project.configuration.user_configuration);
+                                      project.vb_configuration);
                     }
                 });
         }
