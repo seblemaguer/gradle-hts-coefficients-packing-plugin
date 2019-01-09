@@ -84,6 +84,8 @@ public class GenerateCMP
         int size = 0;
         for (int i=0; i<nb_streams; i++) {
             size += O_list.get(i)[0].length;
+            if (O_list.get(i).length < T)
+                T = O_list.get(i).length; // FIXME: warning message
         }
         size = size * T * Float.BYTES;
 
@@ -125,6 +127,8 @@ public class GenerateCMP
         short framesize = 0;
         for (double[][] cur_o: O_list) {
             framesize += (short) cur_o[0].length;
+            if (cur_o.length < nb_frames)
+                nb_frames = cur_o.length;
         }
 
         framesize= (short) (Float.BYTES * framesize);

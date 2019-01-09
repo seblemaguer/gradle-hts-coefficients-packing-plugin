@@ -28,9 +28,9 @@ public class GenerateCMPTask extends DefaultTask {
     /** The worker */
     private final WorkerExecutor workerExecutor;
 
-    /** The list of files to manipulate */
-    @InputFile
-    final RegularFileProperty list_basenames = newInputFile()
+    /** One of the input directory to get the file list */
+    @InputDirectory
+    final DirectoryProperty origin_directory = newInputDirectory()
 
     /** The directory containing the spectrum files */
     @OutputDirectory
@@ -53,10 +53,14 @@ public class GenerateCMPTask extends DefaultTask {
      */
     @TaskAction
     public void generate() {
-        for (String basename: list_basenames.getAsFile().get().readLines()) {
+        // FIXME: for now basename = only extension
+        for (File orig_file: project.fileTree(origin_directory.get()).include('*.*').collect()) {
+            // Get basename
+            String basename = orig_file.getName().take(orig_file.getName().lastIndexOf('.'))
+
             // List all input files
             ArrayList<File> input_files = new ArrayList<File>();
-            for (def stream: project.configuration.user_configuration.models.cmp.streams) {
+            for (def stream: project.vb_configuration.models.cmp.streams) {
                 input_files.add(new File(stream.coeffDir, basename + "." + stream.kind))
             }
 
@@ -70,7 +74,7 @@ public class GenerateCMPTask extends DefaultTask {
                     public void execute(WorkerConfiguration config) {
                         config.setIsolationMode(IsolationMode.NONE);
                         config.params(input_files, cmp_file,
-                                      project.configuration.user_configuration);
+                                      project.vb_configuration);
                     }
                 });
         }
