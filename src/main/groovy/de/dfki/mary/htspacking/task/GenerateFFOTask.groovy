@@ -59,7 +59,7 @@ public class GenerateFFOTask extends DefaultTask {
 
             // List all input files
             ArrayList<File> input_files = new ArrayList<File>();
-            for (def stream: gradle.vb_configuration.models.ffo.streams) {
+            for (def stream: project.gradle.vb_configuration.models.ffo.streams) {
                 input_files.add(new File(stream.coeffDir, basename + "." + stream.kind))
             }
 
@@ -73,7 +73,7 @@ public class GenerateFFOTask extends DefaultTask {
                     public void execute(WorkerConfiguration config) {
                         config.setIsolationMode(IsolationMode.NONE);
                         config.params(input_files, ffo_file,
-                                      gradle.vb_configuration);
+                                      project.gradle.vb_configuration);
                     }
                 });
         }
