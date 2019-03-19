@@ -41,7 +41,6 @@ class HTSPackingPlugin implements Plugin<Project> {
          */
         project.task('generateCMP', type: GenerateCMPTask) {
             description "Generate CMP coefficients necessary for the HMM training using HTS"
-            dependsOn "configurationPacking"
             cmp_directory = project.file("$project.buildDir/cmp")
         }
 
@@ -51,7 +50,6 @@ class HTSPackingPlugin implements Plugin<Project> {
          */
         project.task('generateFFO', type: GenerateFFOTask) {
             description "Generate FFO coefficients necessary for the HMM training using HTS"
-            dependsOn "configurationPacking"
             ffo_dir = new File("$project.buildDir/ffo")
         }
     }

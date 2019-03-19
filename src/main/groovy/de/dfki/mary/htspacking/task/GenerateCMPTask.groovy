@@ -60,7 +60,7 @@ public class GenerateCMPTask extends DefaultTask {
 
             // List all input files
             ArrayList<File> input_files = new ArrayList<File>();
-            for (def stream: project.vb_configuration.models.cmp.streams) {
+            for (def stream: project.gradle.vb_configuration.models.cmp.streams) {
                 input_files.add(new File(stream.coeffDir, basename + "." + stream.kind))
             }
 
@@ -74,7 +74,7 @@ public class GenerateCMPTask extends DefaultTask {
                     public void execute(WorkerConfiguration config) {
                         config.setIsolationMode(IsolationMode.NONE);
                         config.params(input_files, cmp_file,
-                                      project.vb_configuration);
+                                      project.gradle.vb_configuration);
                     }
                 });
         }
