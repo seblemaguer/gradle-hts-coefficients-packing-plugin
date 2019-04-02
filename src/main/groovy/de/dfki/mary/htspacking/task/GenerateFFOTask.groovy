@@ -53,9 +53,9 @@ public class GenerateFFOTask extends DefaultTask {
     @TaskAction
     public void generate() {
         // FIXME: for now basename = only extension
-        project.fileTree(wav_dir.get()).include('*.*').collect { orig_file ->
+        for (File orig_file: project.fileTree(origin_directory.get()).include('*.*').collect()) {
             // Get basename
-            String basename = orig_file.getName().take(filename.lastIndexOf('.'))
+            String basename = orig_file.getName().take(orig_file.getName().lastIndexOf('.'))
 
             // List all input files
             ArrayList<File> input_files = new ArrayList<File>();
@@ -120,7 +120,7 @@ class GenerateFFOWorker implements Runnable {
         for (def stream: configuration.models.ffo.streams) {
             def cur_stream = new Hashtable<String, Object>();
             cur_stream["order"] = stream.order;
-            cur_stream["windows"] = WindowUtils.loadWindows(winfiles);
+            cur_stream["windows"] = WindowUtils.loadWindows(stream.winfiles);
 
             stream_infos.add(cur_stream);
         }
