@@ -3,70 +3,38 @@ package de.dfki.mary.htspacking;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.BufferedReader;
-import java.io.PrintWriter;
-import java.io.InputStreamReader;
-import java.io.FileInputStream;
-import java.util.Hashtable;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.io.FileReader;
-import java.util.Iterator;
-import java.util.Scanner;
-import java.util.Locale;
-import java.nio.file.Files;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import static java.nio.file.StandardCopyOption.*;
-
-
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-
-import org.ejml.simple.SimpleMatrix;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Hashtable;
 
 /**
  *  Generation of CMP HTS observation file
  *
- *  @author <a href="mailto:slemaguer@coli.uni-saarland.de">Sébastien Le Maguer</a>
+ *  @author Sébastien Le Maguer
  */
 public class GenerateCMP
 {
-    private int samplerate;
-    private int frameshift;
-    private ArrayList<Hashtable<String, Object>> stream_infos;
+    /** The sample rate of the signal */
+    protected int samplerate;
 
-    public ArrayList<Hashtable<String, Object>> getStreamInfos() {
-        return stream_infos;
-    }
+    /** The frameshift in milliseconds */
+    protected int frameshift;
 
-    public void setStreamInfos(ArrayList<Hashtable<String, Object>> stream_infos) {
-        this.stream_infos = stream_infos;
-    }
+    /** The list of stream informations */
+    protected ArrayList<Hashtable<String, Object>> stream_infos;
 
-    public int getFrameshift() {
-        return frameshift;
-    }
-
-    public void setFrameshift(int frameshift) {
-        this.frameshift = frameshift;
-    }
-
-    public int getSamplerate() {
-        return samplerate;
-    }
-
-    public void setSamplerate(int samplerate) {
-        this.samplerate = samplerate;
-    }
-
+    /**
+     *  Constructor
+     *
+     *  @param samplerate the samplerate of the original signal
+     *  @param frameshift the frameshift in milliseconds
+     *  @param stream_infos the information of the different streams.
+     */
     public GenerateCMP(int samplerate, int frameshift, ArrayList<Hashtable<String, Object>> stream_infos)
-        throws Exception {
+    {
         setSamplerate(samplerate);
         setFrameshift(frameshift);
         setStreamInfos(stream_infos);
@@ -74,9 +42,12 @@ public class GenerateCMP
 
 
     /**
+     *  Function to merge all the observation using a frame basis.
      *
+     *  @param O_list the list of observation matrices
+     *  @returns the frame based observation matrix in a byte format (ready to be dumped in a file)
      */
-    public static byte[] merge(ArrayList<double[][]> O_list) {
+    protected static byte[] merge(ArrayList<double[][]> O_list) {
         int nb_streams = O_list.size();
         int T = O_list.get(0).length;
 
@@ -108,13 +79,13 @@ public class GenerateCMP
     /**
      *  Add an HTK header to the input cmp file
      *
-     *   @param input_file_name the input cmp file path
-     *   @param output_file_name the output cmp file with header path
-     *   @param frameshift the used frameshift in HTK format
-     *   @param framesize the number of coefficients for one frame
-     *   @param HTK_feature_type the HTK feature type information
+     *  @param O_list the matrix of observations
+     *  @param frameshift the frameshift in milliseconds
+     *  @param HTK_feature_type generally set to 9
+     *  @returns the HTK header as a byte array
+     *  @throws IOException
      */
-    public static byte[] computeHTKHeader(ArrayList<double[][]> O_list, int frameshift, short HTK_feature_type)
+    protected static byte[] computeHTKHeader(ArrayList<double[][]> O_list, int frameshift, short HTK_feature_type)
         throws IOException
     {
 
@@ -144,9 +115,16 @@ public class GenerateCMP
         return buffer.array();
     }
 
-
-
-    private double[][] loadFile(File input_file, int dim) throws FileNotFoundException, IOException {
+    /**
+     *  Load the observations from a file into a double matrix
+     *
+     *  @param input_file the binary file containing the informations store in Float32 format
+     *  @param dim the dimension of a vector of observation
+     *  @returns a double matrix containing the observations
+     *  @throws FileNotFoundException
+     *  @throws IOException
+     */
+    protected double[][] loadFile(File input_file, int dim) throws FileNotFoundException, IOException {
         Path p_input = input_file.toPath();
         byte[] data_bytes = Files.readAllBytes(p_input);
         ByteBuffer buffer = ByteBuffer.wrap(data_bytes);
@@ -170,12 +148,13 @@ public class GenerateCMP
     }
 
     /**
-     * Generateion method => generate the cmp file
+     *  Method to generate the CMP file from a list of observation files
      *
-     *   @param basename: the basename of the utterance file analyzed. Each specific filename is
-     *   built using the kind officients (extensio)
+     *  @param input_files the list of files containing the observations
+     *  @param output_cmp_file the CMP filename
+     *  @throws IOException
      */
-    public void generate(ArrayList<File> input_files, File output_cmp_file) throws Exception
+    public void generate(ArrayList<File> input_files, File output_cmp_file) throws IOException
     {
         // Compute windowing
         int i=0;
@@ -209,5 +188,34 @@ public class GenerateCMP
 
         // Save the cmp file
         Files.write(output_cmp_file.toPath(), output_data);
+    }
+
+
+    /***********************************************************************************************
+     ** Accessors
+     ***********************************************************************************************/
+
+    public ArrayList<Hashtable<String, Object>> getStreamInfos() {
+        return stream_infos;
+    }
+
+    public void setStreamInfos(ArrayList<Hashtable<String, Object>> stream_infos) {
+        this.stream_infos = stream_infos;
+    }
+
+    public int getFrameshift() {
+        return frameshift;
+    }
+
+    public void setFrameshift(int frameshift) {
+        this.frameshift = frameshift;
+    }
+
+    public int getSamplerate() {
+        return samplerate;
+    }
+
+    public void setSamplerate(int samplerate) {
+        this.samplerate = samplerate;
     }
 }

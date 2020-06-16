@@ -38,7 +38,8 @@ public class WindowUtils
     private static final float IGNORE_VALUE = (float) -1.0e+10;
 
     public static ArrayList<double[]> loadWindows(ArrayList<File> win_files)
-        throws FileNotFoundException, IOException {
+        throws FileNotFoundException, IOException
+    {
         ArrayList<double[]> windows = new ArrayList<double[]>();
         for (File win_file: win_files) {
 
@@ -70,7 +71,6 @@ public class WindowUtils
      *
      */
     public static double[][] applyWindows(double[][] input_data, ArrayList<double[]> windows, boolean is_msd)
-        throws Exception
     {
         int T = input_data.length;
         int dim = input_data[0].length;
